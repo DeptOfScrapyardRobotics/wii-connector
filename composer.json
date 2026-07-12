@@ -1,0 +1,56 @@
+{
+    "name": "dept-of-scrapyard-robotics/wii-connector",
+    "description": "Drive Wii/NES/SNES Classic controllers and nunchucks over I2C with PHP",
+    "type": "library",
+    "version": "0.5.0",
+    "keywords": [
+        "framework",
+        "scrapyard-io"
+    ],
+    "license": "MIT",
+    "homepage": "https://dosr.projectsaturnstudios.com",
+    "authors": [
+        {
+            "name": "Angel Gonzalez",
+            "email": "angel@projectsaturnstudios.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "waveforms/i2c": "^0.5.0",
+        "bare-metal/circuits": "^0.5.0",
+        "bare-metal/actuation": "^0.5.0",
+        "bare-metal/contracts": "^0.5.0",
+        "bare-metal/sensors": "^0.5.0",
+        "scrapyard-io/nuts-and-bolts": "^0.5.0"
+    },
+    "require-dev": {
+        "pestphp/pest": "^4",
+        "scrapyard-io/framework": "^0.5.0"
+    },
+    "suggest": {
+        "ext-posi": "^0.4.0",
+        "ext-ftdi": "^0.4.0",
+        "microscrap/posix": "^0.5.0",
+        "microscrap/mpsse": "^0.5.0",
+        "waveforms/i2c": "^0.5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "DeptOfScrapyardRobotics\\Actuators\\WiiConnector\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DeptOfScrapyardRobotics\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
