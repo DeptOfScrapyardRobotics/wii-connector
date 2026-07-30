@@ -2,19 +2,12 @@
 
 namespace DeptOfScrapyardRobotics\Actuators\WiiConnector\Enums;
 
-enum WiiClassicDigitalButton: string
+enum WiiNESDigitalButton: string
 {
     case A = 'A';
     case B = 'B';
-    case X = 'X';
-    case Y = 'Y';
     case START = 'START';
     case SELECT = 'SELECT';
-    case HOME = 'HOME';
-    case ZL = 'ZL';
-    case ZR = 'ZR';
-    case L = 'L';
-    case R = 'R';
     case UP = 'UP';
     case DOWN = 'DOWN';
     case LEFT = 'LEFT';

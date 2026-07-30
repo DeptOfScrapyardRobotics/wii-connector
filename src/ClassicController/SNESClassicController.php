@@ -2,47 +2,21 @@
 
 namespace DeptOfScrapyardRobotics\Actuators\WiiConnector\ClassicController;
 
-use BareMetal\Actuation\HumanInput\DigitalButtonPad;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\Enums\WiiSNESDigitalButton;
+use DeptOfScrapyardRobotics\Actuators\WiiConnector\WiiGamepad;
+use Fabricate\Contracts\Actuation\Interfaces\ButtonPad;
+use Fabricate\Contracts\Circuits\Attributes\IntegratedCircuit;
 
-class SNESClassicController extends WiiClassicController
+#[IntegratedCircuit('I2C')]
+class SNESClassicController extends WiiGamepad implements ButtonPad
 {
-    /**
-     * SNES subset only — no HOME / ZL / ZR.
-     *
-     * @return array<string, bool>
-     */
-    public function getDigitalButtons(): array
-    {
-        $buffer = $this->readData();
+    use InterpretsClassicControllerReports;
 
-        return $this->decodeSNESDigitalButtons($buffer);
-    }
-
-    /**
-     * DigitalButtonPad over SNES buttons. One I2C poll per pad->poll().
-     */
-    public function asDigitalButtonPad(): DigitalButtonPad
+    protected function buttonLabels(): array
     {
-        return $this->digitalButtonPadFromSnapshot(
+        return array_map(
+            static fn (WiiSNESDigitalButton $button): string => $button->value,
             WiiSNESDigitalButton::cases(),
-            fn (): array => $this->getDigitalButtons(),
         );
-    }
-
-    /**
-     * @param  list<int>  $buffer
-     * @return array<string, bool>
-     */
-    protected function decodeSNESDigitalButtons(array $buffer): array
-    {
-        $all = $this->decodeDigitalButtons($buffer);
-        $buttons = [];
-
-        foreach (WiiSNESDigitalButton::cases() as $button) {
-            $buttons[$button->value] = (bool) ($all[$button->value] ?? false);
-        }
-
-        return $buttons;
     }
 }

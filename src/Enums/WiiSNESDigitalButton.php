@@ -2,10 +2,6 @@
 
 namespace DeptOfScrapyardRobotics\Actuators\WiiConnector\Enums;
 
-/**
- * Digital buttons present on a Nintendo SNES Classic Controller
- * (no HOME / ZL / ZR; shoulders are L + R only).
- */
 enum WiiSNESDigitalButton: string
 {
     case A = 'A';
