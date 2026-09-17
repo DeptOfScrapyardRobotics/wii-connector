@@ -1,10 +1,16 @@
 {
     "name": "dept-of-scrapyard-robotics/wii-connector",
-    "description": "Drive Wii/NES/SNES Classic controllers and nunchucks over I2C with PHP",
+    "description": "Read Wii extension controllers (Nunchuck, Classic Controller, NES and SNES Classic Mini) over I2C with the ScrapyardIO GPIO framework.",
     "type": "library",
-    "version": "0.5.0",
+    "version": "0.8.0",
     "keywords": [
-        "framework",
+        "wii",
+        "nunchuck",
+        "classic-controller",
+        "snes",
+        "nes",
+        "gamepad",
+        "i2c",
         "scrapyard-io"
     ],
     "license": "MIT",
@@ -16,24 +22,21 @@
         }
     ],
     "require": {
-        "php": "^8.3",
-        "waveforms/i2c": "^0.5.0",
-        "bare-metal/circuits": "^0.5.0",
-        "bare-metal/actuation": "^0.5.0",
-        "bare-metal/contracts": "^0.5.0",
-        "bare-metal/sensors": "^0.5.0",
-        "scrapyard-io/nuts-and-bolts": "^0.5.0"
+        "php": "^8.4|^8.5|^8.6",
+        "gpio/contracts": "^0.8.0",
+        "gpio/integrated-circuits": "^0.8.0",
+        "venusian-voyager/nuts-and-bolts": "^0.8.0"
     },
     "require-dev": {
+        "gpio/i2c": "^0.8.0",
         "pestphp/pest": "^4",
-        "scrapyard-io/framework": "^0.5.0"
+        "venusian-voyager/config": "^0.8.0",
+        "venusian-voyager/vessel": "^0.8.0"
     },
     "suggest": {
-        "ext-posi": "^0.4.0",
-        "ext-ftdi": "^0.4.0",
-        "microscrap/posix": "^0.5.0",
-        "microscrap/mpsse": "^0.5.0",
-        "waveforms/i2c": "^0.5.0"
+        "gpio/i2c": "^0.8.0 - I2C connections for WiiConnectorI2CTransport",
+        "microscrap/scrapyard-linux": "^0.8.0 - native i2c-dev driver",
+        "microscrap/scrapyard-usb": "^0.8.0 - MPSSE I2C over FTDI"
     },
     "autoload": {
         "psr-4": {
@@ -42,7 +45,17 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "DeptOfScrapyardRobotics\\Tests\\": "tests/"
+            "DeptOfScrapyardRobotics\\Actuators\\WiiConnector\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "0.8.x-dev"
+        },
+        "venusian": {
+            "providers": [
+                "DeptOfScrapyardRobotics\\Actuators\\WiiConnector\\Providers\\WiiConnectorServiceProvider"
+            ]
         }
     },
     "config": {
@@ -52,5 +65,43 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/Volumes/ProjectSaturnStudios/Development/PHP/ProjectSaturnStudios/dev/scrapyard-io/framework/src/GeneralPurposeIO/*",
+            "options": {
+                "symlink": true,
+                "versions": {
+                    "gpio/contracts": "0.8.0",
+                    "gpio/digital": "0.8.0",
+                    "gpio/i2c": "0.8.0",
+                    "gpio/integrated-circuits": "0.8.0",
+                    "gpio/nuts-and-bolts": "0.8.0",
+                    "gpio/pwm": "0.8.0",
+                    "gpio/spi": "0.8.0",
+                    "gpio/uart": "0.8.0"
+                }
+            }
+        },
+        {
+            "type": "path",
+            "url": "/Volumes/ProjectSaturnStudios/Development/PHP/ProjectSaturnStudios/dev/venusian/framework/src/Voyager/*",
+            "options": {
+                "symlink": true,
+                "versions": {
+                    "venusian-voyager/collections": "0.8.8",
+                    "venusian-voyager/conditionable": "0.8.8",
+                    "venusian-voyager/config": "0.8.8",
+                    "venusian-voyager/contracts": "0.8.8",
+                    "venusian-voyager/io-pools": "0.8.8",
+                    "venusian-voyager/macroable": "0.8.8",
+                    "venusian-voyager/magic-aliases": "0.8.8",
+                    "venusian-voyager/nuts-and-bolts": "0.8.8",
+                    "venusian-voyager/reflection": "0.8.8",
+                    "venusian-voyager/vessel": "0.8.8"
+                }
+            }
+        }
+    ]
 }

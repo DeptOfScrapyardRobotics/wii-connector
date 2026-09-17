@@ -4,8 +4,9 @@ namespace DeptOfScrapyardRobotics\Actuators\WiiConnector\Enums;
 
 enum WiiConnectorOpCode: int
 {
-    case DATA = 0x00;
-
-    case HANDSHAKE_1 = 0xF0;
-    case HANDSHAKE_2 = 0xFB;
+    case REPORT = 0x00;
+    case INIT_UNENCRYPTED_1 = 0xF0;
+    case IDENTIFIER = 0xFA;
+    case INIT_UNENCRYPTED_2 = 0xFB;
+    case DATA_FORMAT = 0xFE;
 }
