@@ -5,11 +5,12 @@ use DeptOfScrapyardRobotics\Actuators\WiiConnector\Providers\WiiConnectorService
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\Tests\Support\ConfigPathVessel;
 use Voyager\Config\Repository;
 use Voyager\NutsAndBolts\ServiceProvider;
-use Voyager\Vessel\Vessel;
+use DeptOfScrapyardRobotics\Actuators\WiiConnector\WiiExtension;
+use GeneralPurposeIO\IntegratedCircuits\CircuitRegistry;
 
 it('registers the config under circuits.wii-connector, keeping anything the app already set', function (): void {
-    $vessel = new Vessel;
-    $vessel->instance('config', new Repository(['circuits' => ['wii-connector' => ['default_config' => 'bench']]]));
+    $vessel = new ConfigPathVessel;
+    $vessel->registerInstance('config', new Repository(['circuits' => ['wii-connector' => ['default_config' => 'bench']]]));
 
     (new WiiConnectorServiceProvider($vessel))->register();
 
@@ -22,8 +23,8 @@ it('registers the config under circuits.wii-connector, keeping anything the app 
 });
 
 it('leaves other circuits config beside its own key untouched', function (): void {
-    $vessel = new Vessel;
-    $vessel->instance('config', new Repository(['circuits' => ['seesaw-mini-gamepad' => ['default_config' => 'i2c']]]));
+    $vessel = new ConfigPathVessel;
+    $vessel->registerInstance('config', new Repository(['circuits' => ['seesaw-mini-gamepad' => ['default_config' => 'i2c']]]));
 
     (new WiiConnectorServiceProvider($vessel))->register();
 
@@ -35,7 +36,7 @@ it('leaves other circuits config beside its own key untouched', function (): voi
 
 it('publishes the config file into config/circuits under the wii-connector-config tag', function (): void {
     $app = new ConfigPathVessel('/app/config');
-    $app->instance('config', new Repository);
+    $app->registerInstance('config', new Repository);
 
     $provider = new WiiConnectorServiceProvider($app);
     $provider->register();
@@ -46,4 +47,16 @@ it('publishes the config file into config/circuits under the wii-connector-confi
     expect(ServiceProvider::pathsToPublish(WiiConnectorServiceProvider::class, 'wii-connector-config'))->toBe([
         "{$root}/config/wii-connector.php" => '/app/config/circuits/wii-connector.php',
     ]);
+});
+
+it('adds the configured controller to the circuit catalog when one is bound', function (): void {
+    $app = new ConfigPathVessel;
+    $app->registerInstance('config', new Repository);
+    $app->registerInstance('circuit', $catalog = new CircuitRegistry);
+
+    $provider = new WiiConnectorServiceProvider($app);
+    $provider->register();
+    $provider->boot();
+
+    expect($catalog->listCircuits())->toBe(['wii-connector' => WiiExtension::class]);
 });

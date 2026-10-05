@@ -2,6 +2,7 @@
 
 namespace DeptOfScrapyardRobotics\Actuators\WiiConnector;
 
+use DeptOfScrapyardRobotics\Actuators\WiiConnector\Concerns\ConjuresWiiExtension;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\Concerns\WiiExtensionBootstrap;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\Enums\WiiClassicButton;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\Enums\WiiExtensionId;
@@ -13,6 +14,7 @@ use GeneralPurposeIO\IntegratedCircuits\Bootable;
 /** Anything plugged into a Wii Remote's extension port, at 0x52. */
 abstract class WiiExtension extends Bootable implements Actuator
 {
+    use ConjuresWiiExtension;
     use WiiExtensionBootstrap;
 
     /** @var array<int, WiiButtonState> keyed by button value */

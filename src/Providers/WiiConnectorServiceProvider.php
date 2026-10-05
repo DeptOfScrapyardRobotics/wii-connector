@@ -2,6 +2,7 @@
 
 namespace DeptOfScrapyardRobotics\Actuators\WiiConnector\Providers;
 
+use DeptOfScrapyardRobotics\Actuators\WiiConnector\WiiExtension;
 use Voyager\NutsAndBolts\ServiceProvider;
 
 /**
@@ -20,5 +21,10 @@ class WiiConnectorServiceProvider extends ServiceProvider
         $this->publishes([
             dirname(__DIR__, 2).'/config/wii-connector.php' => $this->app->configPath('circuits/wii-connector.php'),
         ], 'wii-connector-config');
+
+        // With the GPIO catalog installed, the configured controller is conjurable: app('circuit')->conjure('wii-connector').
+        if ($this->app->isBound('circuit')) {
+            $this->app->make('circuit')->addCircuit('wii-connector', WiiExtension::class);
+        }
     }
 }

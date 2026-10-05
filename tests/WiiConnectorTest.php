@@ -8,66 +8,13 @@ use DeptOfScrapyardRobotics\Actuators\WiiConnector\Enums\WiiExtensionId;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\Enums\WiiNunchuckButton;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\Nunchuck\WiiNunchuck;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\Nunchuck\WiiNunchuckConfiguration;
-use DeptOfScrapyardRobotics\Actuators\WiiConnector\Tests\Support\FakeGPIOResource;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\Tests\Support\FakeI2CTransport;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\Transports\WiiConnectorI2CTransport;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\WiiButtonState;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\WiiConnectorConfiguration;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\WiiConnectorException;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\WiiExtension;
-use GeneralPurposeIO\Contracts\Core\Recurrence;
-
-/** Identifier the bench SNES Classic Mini controller answers. */
-const SNES_MINI_ID = [0x01, 0x00, 0xA4, 0x20, 0x01, 0x01];
-
-const WII_CLASSIC_ID = [0x00, 0x00, 0xA4, 0x20, 0x01, 0x01];
-
-const NUNCHUCK_ID = [0x00, 0x00, 0xA4, 0x20, 0x00, 0x00];
-
-/** The bench SNES controller's identifier while left in high-resolution mode. */
-const SNES_MINI_HIGH_RES_ID = [0x01, 0x00, 0xA4, 0x20, 0x03, 0x01];
-
-/** Analog bytes the bench SNES controller reports: sticks centred, triggers released. */
-const SNES_MINI_ANALOG = [0xA0, 0x20, 0x10, 0x00];
-
-/** A Classic-family report with these buttons down. */
-function classicReport(array $analog = SNES_MINI_ANALOG, Btn ...$pressed): array
-{
-    $word = 0xFFFF;
-
-    foreach ($pressed as $button) {
-        $word &= ~(1 << $button->value);
-    }
-
-    return [...$analog, $word >> 8, $word & 0xFF];
-}
-
-function pressed(Btn ...$buttons): array
-{
-    return classicReport(SNES_MINI_ANALOG, ...$buttons);
-}
-
-function wiiConfig(): WiiConnectorConfiguration
-{
-    return new WiiConnectorConfiguration(init_wait_ms: 0, read_delay_us: 0);
-}
-
-/**
- * @param  class-string<WiiExtension>  $class
- * @return array{0: WiiExtension, 1: FakeI2CTransport} booted, boot traffic cleared
- */
-function wii(string $class, array $reports = [], array $id = SNES_MINI_ID, ?WiiConnectorConfiguration $config = null): array
-{
-    $bus = new FakeI2CTransport;
-    $bus->replies = [$id, ...$reports];
-    $config ??= $class === WiiNunchuck::class
-        ? new WiiNunchuckConfiguration(init_wait_ms: 0, read_delay_us: 0)
-        : wiiConfig();
-    $chip = new $class(new WiiConnectorI2CTransport($bus), $config, boot_now: true);
-    $bus->log = [];
-
-    return [$chip, $bus];
-}
+use Voyager\Contracts\IOPools\LoopResources\Timer;
 
 // --- boot ---------------------------------------------------------------------
 
@@ -323,18 +270,27 @@ it('refuses Classic buttons on the Nunchuck and Nunchuck buttons on a Classic co
         ->and(fn () => $classic->isDown(WiiNunchuckButton::Z))->toThrow(WiiConnectorException::class, 'WiiClassicController has no Z button');
 });
 
-// --- dock, settings, errors -----------------------------------------------------------
+// --- event loop, settings, errors -----------------------------------------------------------
 
-it('puts poll() on the gpio dock', function (): void {
-    [$snes, $bus] = wii(SNESClassicController::class, [pressed(Btn::A)]);
-    $gpio = new FakeGPIOResource;
+it('runs poll() on a named loop timer, and stop() takes it off', function (): void {
+    [$snes, $bus] = wii(SNESClassicController::class, array_fill(0, 50, pressed(Btn::A)));
+    $loop = testLoop();
+    $loop->every(0.001, function () use ($bus, $loop): void {
+        if (count($bus->log) >= 4) {
+            $loop->stop();
+        }
+    }, 'watcher');
 
-    $recurrence = $snes->every($gpio, 3);
+    $timer = $snes->every($loop, 0.001);
 
-    expect($recurrence)->toBeInstanceOf(Recurrence::class)
-        ->and($bus->log)->toBe([])
-        ->and($gpio->runRecurrence('wii-extension'))->toBe($snes)
-        ->and($snes->pressedButtons())->toBe([Btn::A]);
+    expect($timer)->toBeInstanceOf(Timer::class)->and($bus->log)->toBe([]);
+
+    $loop->run();
+    $snes->stop($loop);
+    $loop->forget('watcher');
+
+    expect($snes->isDown(Btn::A))->toBeTrue()
+        ->and($loop->registry->hasWork())->toBeFalse();
 });
 
 it('waits the configured delay between selecting a register and reading it', function (): void {

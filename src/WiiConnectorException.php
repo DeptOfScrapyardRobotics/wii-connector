@@ -42,4 +42,14 @@ class WiiConnectorException extends CircuitException
     {
         return new static("hold_ms takes 0 or more; got {$hold_ms}.");
     }
+
+    public static function notAController(string $class): static
+    {
+        return new static("[{$class}] is not a concrete Wii extension controller class.");
+    }
+
+    public static function notConnected(string $protocol, string $driver, string|int $device): static
+    {
+        return new static("Wii connector could not get a {$protocol} connection from driver [{$driver}] on device [{$device}].");
+    }
 }

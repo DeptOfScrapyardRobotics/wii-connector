@@ -4,7 +4,7 @@ title: Settings and config
 description: WiiConnectorConfiguration and WiiNunchuckConfiguration, magic properties, the circuits.wii-connector config file and its publish tag.
 tags: [settings, configuration, provider, publish]
 status: draft
-generated: { by: claude-opus-5/claude-code, at: "2026-09-16T00:00:00Z" }
+generated: { by: claude-opus/5.5, at: 2026-10-05T00:30:00Z }
 sources:
   - id: configuration
     resource: src/WiiConnectorConfiguration.php
@@ -36,7 +36,7 @@ All: `identifier`, `extension_id` (bus), `report`, `buttons`, `hold_ms` / `inver
 
 # Config file
 
-Merged under `circuits.wii-connector`, published to `config/circuits/wii-connector.php`, tag `wii-connector-config`.[^provider] Keys: `default_config`; `configs.i2c.driver` / `device` / `slave` (0x52) / `controller` (class, default `WiiClassicController`). Package reads none of it.
+Merged under `circuits.wii-connector`, published to `config/circuits/wii-connector.php`, tag `wii-connector-config`; `circuit` bound → `addCircuit('wii-connector', WiiExtension::class)`.[^provider] Keys: `default_config`; `configs.i2c.driver` / `device` / `slave` (0x52) / `controller` (class, default `WiiClassicController`); `boot_now`. `conjure()` passes them to `i2c()`. An app's `configs.i2c` replaces the package's whole entry, so it names `controller` itself.
 
 [^configuration]: WiiConnectorConfiguration
 [^nunchuck-configuration]: WiiNunchuckConfiguration

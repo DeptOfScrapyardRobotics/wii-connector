@@ -4,7 +4,7 @@ title: Extension protocol
 description: Registers, unencrypted init, identifier, data format and the six-byte report layouts the package decodes.
 tags: [protocol, registers, report, i2c]
 status: draft
-generated: { by: claude-opus-5/claude-code, at: "2026-09-16T00:00:00Z" }
+generated: { by: claude-opus/5.5, at: 2026-10-05T00:30:00Z }
 sources:
   - id: transport
     resource: src/Transports/WiiConnectorI2CTransport.php

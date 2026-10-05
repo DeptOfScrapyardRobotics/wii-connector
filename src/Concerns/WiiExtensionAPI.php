@@ -7,8 +7,8 @@ use DeptOfScrapyardRobotics\Actuators\WiiConnector\Enums\WiiConnectorOpCode;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\Enums\WiiNunchuckButton;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\WiiButtonState;
 use DeptOfScrapyardRobotics\Actuators\WiiConnector\WiiConnectorException;
-use GeneralPurposeIO\Contracts\Core\GPIOResourceDriver;
-use GeneralPurposeIO\Contracts\Core\Recurrence;
+use Voyager\Contracts\IOPools\Loop;
+use Voyager\Contracts\IOPools\LoopResources\Timer;
 
 trait WiiExtensionAPI
 {
@@ -111,10 +111,16 @@ trait WiiExtensionAPI
         return $this;
     }
 
-    /** Put poll() on the gpio dock. */
-    public function every(GPIOResourceDriver $gpio, int $ticks = 1, string $name = 'wii-extension'): Recurrence
+    /** poll() every $interval_s seconds on the event loop, under $name. */
+    public function every(Loop $loop, float $interval_s = 0.01, string $name = 'wii-extension'): Timer
     {
-        return $gpio->every($name, fn (): static => $this->poll(), $ticks);
+        return $loop->every($interval_s, fn (): static => $this->poll(), $name);
+    }
+
+    /** Take the every() timer named $name off the loop. */
+    public function stop(Loop $loop, string $name = 'wii-extension'): void
+    {
+        $loop->forget($name);
     }
 
     /** (raw − center) / range, clamped to −1 … 1. */
@@ -168,9 +174,9 @@ trait WiiExtensionAPI
         return $this->button($button)->wasReleased();
     }
 
-    public function isHolding(WiiClassicButton|WiiNunchuckButton $button): bool
+    public function isHolding(WiiClassicButton|WiiNunchuckButton $button, ?int $hold_ms = null): bool
     {
-        return $this->button($button)->isHolding($this->config()->get('hold_ms'));
+        return $this->button($button)->isHolding($hold_ms ?? $this->config()->get('hold_ms'));
     }
 
     public function heldMs(WiiClassicButton|WiiNunchuckButton $button): int
